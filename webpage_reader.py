@@ -25,7 +25,6 @@ class PageReader:
         tables = soup.find_all('table', class_='wikitable')
         # Send Table 1 for Orbital Satellite data
         records = self.extract_data(tables[0])
-
         # Create records date wise
         #date = pytz.utc.localize(date)
         present_date = pytz.utc.localize(parse("2019-01-01"))
@@ -37,9 +36,14 @@ class PageReader:
                 count = 0
             if present_date == rec[0]:
                 count += 1
-            else:
-                print("%s,%d", present_date, count)
-                count = 0
+        
+        print ("%s,%d"%(present_date.isoformat(),count))
+        present_date = present_date + timedelta(days=1)
+
+        # Print for remaining days
+        while present_date <= pytz.utc.localize(parse("2019-12-31")):
+            print ("%s,%d"%(present_date.isoformat(),0))
+            present_date = present_date + timedelta(days=1)
 
     
     def extract_data(self, table_data):
@@ -70,8 +74,9 @@ class PageReader:
                 if rec_flight_status in ["operational", "en route", "successful"]:
                     # Can be changed for count
                     was_success = True
-                #print(rec_flight_status, end='\t')
         
+        if rec_date != None and was_success:
+            records.append((rec_date, was_success))
         return records
     
     def clean_data(self, text):
