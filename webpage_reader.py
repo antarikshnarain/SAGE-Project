@@ -4,15 +4,11 @@ from bs4 import BeautifulSoup as bs
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 import pytz
-"""
-table.wikitable collapsible mw-collapsible mw-made-collapsible
-
-table1:
-    start: 4
-
-"""
 
 class PageReader:
+    """
+    Class to read page and parse data to csv
+    """
     def __init__(self, page_url):
         """
         params page_url : string url of page
@@ -20,13 +16,15 @@ class PageReader:
         self.url = page_url
     
     def parse_page(self):
+        """
+        Parse page and print data
+        """
         response = rq.get(self.url)
         soup = bs(response.text,'html5lib')
         tables = soup.find_all('table', class_='wikitable')
         # Send Table 1 for Orbital Satellite data
         records = self.extract_data(tables[0])
         # Create records date wise
-        #date = pytz.utc.localize(date)
         present_date = pytz.utc.localize(parse("2019-01-01"))
         count = 0
         for rec in records:
@@ -63,8 +61,6 @@ class PageReader:
                 # Extract Date
                 rec_date = self.clean_data_date(row_data[0].getText())
                 was_success = False
-                #print("---------------------------------")
-                #print(rec_date, end='\t')
             elif len(row_data) == 4:
                 # Previous date to be used
                 pass
@@ -92,7 +88,6 @@ class PageReader:
     
     def clean_data_date(self, date):
         date = re.sub(r"[^ \w\d:].*","",date)
-        #date = datetime.strptime(date,'%d %B%H:%M')
         date = parse(date)
         # Loosing Time data
         date = date.replace(year=2019,hour=0,minute=0,second=0,microsecond=0)
